@@ -1,6 +1,6 @@
 import {
   createNewSubFolder,
-  deleteFolder,
+  deleteSubFolder,
   getFolderById,
 } from "@/services/folders";
 import { CreateFolderForm, FoldersResponse } from "@/services/folders/types";
@@ -80,12 +80,12 @@ export function useDetailsController() {
     }
   }, [formCreateFolder.value, params.id]);
 
-  const deleteSubFolder = async (parentId: string) => {
+  const handleDeleteSubFolder = async (parentId: string) => {
     const parentIdFormatted = parentId.split("/").pop();
 
     try {
       if (form.value.selectedItem && parentIdFormatted) {
-        await deleteFolder(form.value.selectedItem.id, parentIdFormatted);
+        await deleteSubFolder(form.value.selectedItem.id, parentIdFormatted);
         console.log("Subpasta excluída com sucesso");
       }
     } catch (error) {
@@ -113,6 +113,6 @@ export function useDetailsController() {
     formCreateFolder,
     createSubFolder,
     onRefresh,
-    deleteSubFolder,
+    handleDeleteSubFolder,
   };
 }

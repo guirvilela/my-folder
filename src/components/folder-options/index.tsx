@@ -5,14 +5,18 @@ import { styled } from "./styles";
 interface ModalFolderOptionsProps {
   name: string;
   opened: boolean;
+  isSubFolder: boolean;
   onCloseOptions: () => void;
   onDelete: () => void;
+  onCopy?: () => void;
 }
 
 export function ModalFolderOptions({
   opened,
   name,
+  isSubFolder,
   onCloseOptions,
+  onCopy,
   onDelete,
 }: ModalFolderOptionsProps) {
   return (
@@ -22,6 +26,12 @@ export function ModalFolderOptions({
           <Text style={styled.title}>{name}</Text>
 
           <View style={styled.buttonContainer}>
+            {!isSubFolder && (
+              <TouchableOpacity style={styled.defaultButton} onPress={onCopy}>
+                <Text style={styled.buttonTextCancel}>Copiar pasta</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity style={styled.buttonDelete} onPress={onDelete}>
               <Text style={styled.buttonText}>Excluir pasta</Text>
             </TouchableOpacity>

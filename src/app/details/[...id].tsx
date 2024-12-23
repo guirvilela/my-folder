@@ -6,16 +6,10 @@ import { ModalCreateFolder } from "@/components/modal-folder";
 import { useDetailsController } from "@/hooks/details";
 import { ImageProp } from "@/services/folders/types";
 
-import { colors } from "@/styles/colors";
-import { IconArrowLeft, IconFolderFilled } from "@tabler/icons-react-native";
+import { IconFolderFilled } from "@tabler/icons-react-native";
 import { router, usePathname } from "expo-router";
 import React from "react";
-import {
-  FlatList,
-  RefreshControl,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 
 export default function FolderDetails() {
   const {
@@ -23,7 +17,7 @@ export default function FolderDetails() {
     formCreateFolder,
     onRefresh,
     createSubFolder,
-    deleteSubFolder,
+    handleDeleteSubFolder,
   } = useDetailsController();
 
   const pathname = usePathname();
@@ -63,11 +57,8 @@ export default function FolderDetails() {
 
   return (
     <View style={{ flex: 1, padding: 24, gap: 12 }}>
-      <TouchableHighlight onPress={() => router.back()}>
-        <IconArrowLeft size={24} color={colors.gray[300]} />
-      </TouchableHighlight>
-
       <Header
+        isSubFolder
         title={form.value.folder?.name}
         onOpenModalCreateFolder={() =>
           formCreateFolder.set("modalCreate")(true)
@@ -113,7 +104,8 @@ export default function FolderDetails() {
           opened={form.value.modalOptions}
           name={form.value.selectedItem?.name ?? ""}
           onCloseOptions={() => form.set("modalOptions")(false)}
-          onDelete={() => deleteSubFolder(pathname)}
+          onDelete={() => handleDeleteSubFolder(pathname)}
+          isSubFolder
         />
       )}
     </View>

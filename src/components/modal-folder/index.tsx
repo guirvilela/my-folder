@@ -28,12 +28,13 @@ export function ModalCreateFolder({
             placeholder="Nome da pasta"
             value={form.value.nameFolder}
             onChangeText={(v) => form.set("nameFolder")(v)}
+            autoFocus
           />
 
           <View style={styled.buttonContainer}>
             <TouchableOpacity
               style={styled.buttonCancel}
-              onPress={() => form.set("modalCreate")(false)}
+              onPress={() => form.reset()}
             >
               <Text style={styled.buttonText}>Cancelar</Text>
             </TouchableOpacity>

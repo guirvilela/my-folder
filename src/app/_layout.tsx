@@ -11,7 +11,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { getApps } from "firebase/app";
 import { useCallback, useEffect } from "react";
-import { View } from "react-native";
+import { StatusBar, View } from "react-native";
 import "react-native-reanimated";
 import { app } from "../../firebaseConfig";
 
@@ -51,6 +51,8 @@ export default function Layout() {
 
   return (
     <View onLayout={onLayout} style={{ flex: 1 }}>
+      <StatusBar barStyle="light-content" />
+
       <Stack
         screenOptions={{
           headerShown: false,

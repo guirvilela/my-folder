@@ -33,6 +33,15 @@ export const styled = StyleSheet.create({
     gap: 8,
   },
 
+  defaultButton: {
+    color: colors.gray[100],
+    backgroundColor: colors.gray[200],
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+    alignItems: "center",
+  },
+
   button: {
     color: colors.gray[600],
     padding: 10,
@@ -40,6 +49,7 @@ export const styled = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
+
   buttonDelete: {
     backgroundColor: colors.red.base,
     padding: 10,

@@ -1,4 +1,5 @@
 import { Folder } from "@/components/folder";
+import { ModalFolderOptions } from "@/components/folder-options";
 import { Header } from "@/components/header";
 import { ModalCreateFolder } from "@/components/modal-folder";
 import { useHomeController } from "@/hooks/home";
@@ -8,12 +9,19 @@ import React from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 
 export default function Home() {
-  const { form, formCreateFolder, createFolder, onRefresh } =
-    useHomeController();
+  const {
+    form,
+    formCreateFolder,
+    createFolder,
+    onRefresh,
+    handleDeleteMainFolder,
+    handleCopyFolderStructure,
+  } = useHomeController();
 
   return (
     <View style={{ flex: 1, padding: 24, gap: 24 }}>
       <Header
+        isSubFolder={false}
         onOpenModalCreateFolder={() =>
           formCreateFolder.set("modalCreate")(true)
         }
@@ -38,9 +46,12 @@ export default function Home() {
                 params: { id: item.id },
               })
             }
-            onDelete={function (): void {
-              throw new Error("Function not implemented.");
-            }}
+            onLongPress={() =>
+              form.setAll({
+                modalOptions: true,
+                selectedItem: item,
+              })
+            }
           />
         )}
         keyExtractor={(item) => item.id}
@@ -53,6 +64,17 @@ export default function Home() {
       />
 
       <ModalCreateFolder form={formCreateFolder} onComplete={createFolder} />
+
+      {form.value.modalOptions && (
+        <ModalFolderOptions
+          opened={form.value.modalOptions}
+          name={form.value.selectedItem?.name ?? ""}
+          onCloseOptions={() => form.set("modalOptions")(false)}
+          onDelete={handleDeleteMainFolder}
+          onCopy={handleCopyFolderStructure}
+          isSubFolder={false}
+        />
+      )}
     </View>
   );
 }

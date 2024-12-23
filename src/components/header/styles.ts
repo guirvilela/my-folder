@@ -1,7 +1,11 @@
 import { colors, fontFamily } from "@/styles/theme";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
+import { getStatusBarHeight } from "react-native-status-bar-height";
 
 export const styled = StyleSheet.create({
+  arrow: {
+    paddingTop: Platform.OS === "ios" ? getStatusBarHeight() + 16 : 24,
+  },
   container: {
     width: "100%",
     flexDirection: "row",

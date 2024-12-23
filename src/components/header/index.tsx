@@ -1,24 +1,38 @@
-import { IconPlus } from "@tabler/icons-react-native";
-import { Text, View } from "react-native";
+import { colors } from "@/styles/colors";
+import { IconArrowLeft, IconPlus } from "@tabler/icons-react-native";
+import { router } from "expo-router";
+import { Text, TouchableHighlight, View } from "react-native";
 import { Button } from "../button";
 import { styled } from "./styles";
 
 interface HeaderProps {
   title?: string;
+  isSubFolder: boolean;
   onOpenModalCreateFolder?: () => void;
 }
-export function Header({ title, onOpenModalCreateFolder }: HeaderProps) {
+export function Header({
+  title,
+  isSubFolder,
+  onOpenModalCreateFolder,
+}: HeaderProps) {
   return (
-    <View style={styled.container}>
-      <Text style={styled.title}>{title || "Minhas pastas"}</Text>
+    <View style={styled.arrow}>
+      {isSubFolder && (
+        <TouchableHighlight onPress={() => router.back()}>
+          <IconArrowLeft size={24} color={colors.gray[300]} />
+        </TouchableHighlight>
+      )}
+      <View style={styled.container}>
+        <Text style={styled.title}>{title || "Minhas pastas"}</Text>
 
-      <Button
-        style={{ padding: 10, height: 42 }}
-        onPress={onOpenModalCreateFolder}
-      >
-        <Button.Icon icon={IconPlus} />
-        <Button.Title>Pasta</Button.Title>
-      </Button>
+        <Button
+          style={{ padding: 10, height: 42 }}
+          onPress={onOpenModalCreateFolder}
+        >
+          <Button.Icon icon={IconPlus} />
+          <Button.Title>Pasta</Button.Title>
+        </Button>
+      </View>
     </View>
   );
 }

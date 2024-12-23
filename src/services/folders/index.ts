@@ -33,7 +33,6 @@ export async function getFolders(): Promise<FoldersResponse[]> {
 
     return folders;
   } catch (error) {
-    console.error("Erro ao obter pastas:", error);
     return [];
   }
 }
@@ -91,45 +90,116 @@ export async function createNewSubFolder(
     const folderRef = doc(foldersCollection);
     await setDoc(folderRef, { ...folderData, id: folderRef.id });
 
-    console.log(`Subpasta criada com ID: ${folderRef.id}`);
-
     const mainFolderRef = doc(foldersCollection, parentId);
     await updateDoc(mainFolderRef, {
       subfolders: arrayUnion(folderRef.id),
     });
 
-    console.log(
-      `Subpasta ${folderRef.id} adicionada à pasta principal ${parentId}`
-    );
-
     return folderRef.id;
   } catch (error) {
-    console.error("Erro ao criar a subpasta:", error);
     throw error;
   }
 }
 
-export async function deleteFolder(folderId: string, parentId: string) {
+export async function deleteMainFolder(folderId: string) {
+  try {
+    const foldersCollection = collection(firestore, "folders");
+    const folderRef = doc(foldersCollection, folderId);
+
+    const folderSnapshot = await getDoc(folderRef);
+    const folderData = folderSnapshot.data();
+
+    if (!folderSnapshot.exists() || !folderData) {
+      return;
+    }
+
+    const subfolders = folderData.subfolders || [];
+    for (const subfolderId of subfolders) {
+      await deleteMainFolder(subfolderId);
+    }
+
+    await deleteDoc(folderRef);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteSubFolder(folderId: string, parentId: string) {
   try {
     const foldersCollection = collection(firestore, "folders");
 
-    // Obtém referência para a pasta pai
     const parentFolderRef = doc(foldersCollection, parentId);
 
-    // Remove a subpasta da lista de subpastas da pasta pai
     await updateDoc(parentFolderRef, {
       subfolders: arrayRemove(folderId),
     });
 
-    console.log(`Subpasta ${folderId} removida da pasta principal ${parentId}`);
-
-    // Exclui a subpasta
     const folderRef = doc(foldersCollection, folderId);
     await deleteDoc(folderRef);
-
-    console.log(`Subpasta ${folderId} excluída com sucesso`);
   } catch (error) {
-    console.error("Erro ao excluir a pasta:", error);
     throw error;
   }
 }
+
+export const copyFolderStructure = async (
+  folderId?: string | null,
+  folderName?: string,
+  newParentId: string | null = null
+) => {
+  try {
+    const foldersCollection = collection(firestore, "folders");
+
+    // Caso esteja criando uma nova pasta principal (sem copiar)
+    if (!folderId) {
+      const newFolderRef = await addDoc(foldersCollection, {
+        name: folderName,
+        parentId: null,
+        subfolders: [],
+      });
+
+      console.log(`Nova pasta principal criada: ${newFolderRef.id}`);
+      return newFolderRef.id;
+    }
+
+    const folderRef = doc(foldersCollection, folderId);
+    const folderSnapshot = await getDoc(folderRef);
+
+    if (!folderSnapshot.exists()) {
+      console.error(`A pasta com ID ${folderId} não existe!`);
+      return null;
+    }
+
+    const folderData = folderSnapshot.data();
+
+    const { name, subfolders, ...restData } = folderData;
+    const newFolderRef = await addDoc(foldersCollection, {
+      ...restData,
+      name: name,
+      parentId: newParentId,
+      subfolders: [],
+    });
+
+    console.log(`Nova pasta criada: ${newFolderRef.id} (cópia de ${folderId})`);
+
+    // Copiar subpastas da pasta original
+    const newSubfolderIds: string[] = [];
+    for (const subfolderId of subfolders || []) {
+      const newSubfolderId = await copyFolderStructure(
+        subfolderId,
+        undefined,
+        newFolderRef.id
+      ); // Chamada recursiva
+      if (newSubfolderId) {
+        newSubfolderIds.push(newSubfolderId); // Adiciona o ID da subpasta copiada
+      }
+    }
+
+    // Atualizar o campo `subfolders` da nova pasta com os IDs das subpastas copiadas
+    await updateDoc(newFolderRef, { subfolders: newSubfolderIds });
+
+    return newFolderRef.id; // Retorna o ID da nova pasta criada
+  } catch (error) {
+    console.error("Erro ao copiar a estrutura de pastas:", error);
+    throw error;
+  }
+};

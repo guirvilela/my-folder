@@ -1,4 +1,9 @@
-import { createMainFolder, getFolders } from "@/services/folders";
+import {
+  copyFolderStructure,
+  createMainFolder,
+  deleteMainFolder,
+  getFolders,
+} from "@/services/folders";
 import { CreateFolderForm, FoldersResponse } from "@/services/folders/types";
 import React from "react";
 import { useForm } from "../form";
@@ -6,12 +11,16 @@ import { useForm } from "../form";
 interface FoldersForm {
   folders: FoldersResponse[];
   refresh: boolean;
+  modalOptions: boolean;
+  selectedItem: FoldersResponse | undefined;
 }
 
 export function useHomeController() {
   const form = useForm<FoldersForm>({
     folders: [],
     refresh: false,
+    modalOptions: false,
+    selectedItem: undefined,
   });
 
   const formCreateFolder = useForm<CreateFolderForm>({
@@ -40,6 +49,30 @@ export function useHomeController() {
     }
   }, [formCreateFolder.value]);
 
+  const handleCopyFolderStructure = React.useCallback(async () => {
+    const data = await copyFolderStructure(
+      form.value.selectedItem?.id,
+      formCreateFolder.value.nameFolder
+    );
+
+    form.reset(["folders"]);
+    getAllFolders();
+  }, [form.value, formCreateFolder.value]);
+
+  const handleDeleteMainFolder = React.useCallback(async () => {
+    try {
+      if (!form.value.selectedItem?.id) {
+        return;
+      }
+
+      await deleteMainFolder(form.value.selectedItem?.id);
+    } catch (error) {
+    } finally {
+      getAllFolders();
+      form.reset();
+    }
+  }, [form.value]);
+
   const onRefresh = async () => {
     form.set("refresh")(true);
     await getAllFolders();
@@ -50,5 +83,12 @@ export function useHomeController() {
     getAllFolders();
   }, []);
 
-  return { form, formCreateFolder, onRefresh, createFolder };
+  return {
+    form,
+    formCreateFolder,
+    onRefresh,
+    createFolder,
+    handleDeleteMainFolder,
+    handleCopyFolderStructure,
+  };
 }
