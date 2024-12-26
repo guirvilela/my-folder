@@ -78,7 +78,7 @@ export default function FolderDetails() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 24 }}>
+    <View style={{ flex: 1, padding: 24, gap: 18 }}>
       <Header
         isSubFolder
         title={form.value.folder?.name}
@@ -86,6 +86,7 @@ export default function FolderDetails() {
           formCreateFolder.set("modalCreate")(true)
         }
       />
+
       {getFolder.loading || form.value.loadingImages ? (
         <FlatList
           data={Array.from({ length: 6 })}
@@ -116,7 +117,6 @@ export default function FolderDetails() {
             if (item.type === "image" && "image" in item) {
               const { uri, description, createdAt } = item.image;
 
-              console.log(item.image);
               return (
                 <Image
                   uri={uri}
