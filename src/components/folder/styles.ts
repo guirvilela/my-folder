@@ -9,7 +9,7 @@ export const styled = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.gray[200],
     width: "100%",
-    maxWidth: 160,
+    maxWidth: 164,
     height: 180,
     paddingHorizontal: 8,
     borderRadius: 10,

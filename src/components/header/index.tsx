@@ -16,12 +16,18 @@ export function Header({
   onOpenModalCreateFolder,
 }: HeaderProps) {
   return (
-    <View style={styled.arrow}>
-      {isSubFolder && (
-        <TouchableHighlight onPress={() => router.back()}>
-          <IconArrowLeft size={24} color={colors.gray[300]} />
-        </TouchableHighlight>
-      )}
+    <View>
+      <View style={styled.arrow}>
+        {isSubFolder && (
+          <TouchableHighlight
+            onPress={() => router.back()}
+            underlayColor="transparent"
+          >
+            <IconArrowLeft size={26} color={colors.gray[300]} />
+          </TouchableHighlight>
+        )}
+      </View>
+
       <View style={styled.container}>
         <Text style={styled.title}>{title || "Minhas pastas"}</Text>
 

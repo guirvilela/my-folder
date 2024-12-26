@@ -33,7 +33,6 @@ export default function Layout() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    // Verificar se o Firebase está inicializado
     if (getApps().length === 0) {
       console.error("Firebase não foi inicializado corretamente!");
     } else {

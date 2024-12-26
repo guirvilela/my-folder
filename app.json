@@ -21,6 +21,16 @@
       "image": "./assets/images/splash-icon.png",
       "backgroundColor": "#257F49"
     },
+    "plugins": [
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Permitir ${PRODUCT_NAME} acessar suas fotos",
+          "savePhotosPermission": "Permitir que ${PRODUCT_NAME} salvar fotos" ,
+          "isAccessMediaLocationEnabled": "true"
+        }
+      ]
+    ],
     "android": {
       "package": "com.guirvilela.myfolder"
     }

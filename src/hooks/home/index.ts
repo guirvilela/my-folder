@@ -3,16 +3,24 @@ import {
   createMainFolder,
   deleteMainFolder,
   getFolders,
+  renameFolder,
 } from "@/services/folders";
-import { CreateFolderForm, FoldersResponse } from "@/services/folders/types";
+import {
+  CreateFolderForm,
+  FoldersResponse,
+  RenameFolderForm,
+} from "@/services/folders/types";
 import React from "react";
+import { Alert } from "react-native";
 import { useForm } from "../form";
+import { useCustomAct } from "../http";
 
 interface FoldersForm {
   folders: FoldersResponse[];
   refresh: boolean;
   modalOptions: boolean;
   selectedItem: FoldersResponse | undefined;
+  loading: boolean;
 }
 
 export function useHomeController() {
@@ -21,6 +29,7 @@ export function useHomeController() {
     refresh: false,
     modalOptions: false,
     selectedItem: undefined,
+    loading: false,
   });
 
   const formCreateFolder = useForm<CreateFolderForm>({
@@ -28,50 +37,92 @@ export function useHomeController() {
     modalCreate: false,
   });
 
-  const getAllFolders = React.useCallback(async () => {
+  const formRenameFolder = useForm<RenameFolderForm>({
+    newName: "",
+    rename: false,
+  });
+
+  const getAllFolders = useCustomAct(async () => {
     const data = await getFolders();
 
     form.set("folders")(data);
-  }, [form]);
+  });
 
-  const createFolder = React.useCallback(async () => {
-    try {
-      await createMainFolder({
-        images: [],
-        name: formCreateFolder.value.nameFolder,
-        subfolders: [],
-      });
-    } catch (error) {
-      console.error("Erro ao criar a pasta principal:", error);
-    } finally {
-      formCreateFolder.reset();
-      getAllFolders();
+  const createFolderAction = useCustomAct(async () => {
+    if (!formCreateFolder.value.nameFolder) {
+      throw new Error("Dados inválidos");
     }
-  }, [formCreateFolder.value]);
 
-  const handleCopyFolderStructure = React.useCallback(async () => {
-    const data = await copyFolderStructure(
+    await createMainFolder({
+      images: [],
+      name: formCreateFolder.value.nameFolder,
+      subfolders: [],
+    });
+
+    formCreateFolder.reset();
+    await getAllFolders();
+  });
+
+  const handleCopyFolderAction = useCustomAct(async () => {
+    if (!form.value.selectedItem?.id) {
+      throw new Error("Dados inválidos");
+    }
+
+    const id = await copyFolderStructure(
       form.value.selectedItem?.id,
-      formCreateFolder.value.nameFolder
+      formCreateFolder.value.nameFolder ?? "Nova pasta"
     );
 
-    form.reset(["folders"]);
-    getAllFolders();
-  }, [form.value, formCreateFolder.value]);
-
-  const handleDeleteMainFolder = React.useCallback(async () => {
-    try {
-      if (!form.value.selectedItem?.id) {
-        return;
-      }
-
-      await deleteMainFolder(form.value.selectedItem?.id);
-    } catch (error) {
-    } finally {
-      getAllFolders();
-      form.reset();
+    form.reset();
+    if (id) {
+      await getAllFolders();
     }
-  }, [form.value]);
+  });
+
+  const deleteMainFolderAction = useCustomAct(async () => {
+    if (!form.value.selectedItem?.id) {
+      throw new Error("Dados inválidos");
+    }
+
+    const id = await deleteMainFolder(form.value.selectedItem?.id);
+
+    form.reset();
+    if (id) {
+      await getAllFolders();
+    }
+  });
+
+  const handleQuestionDelete = React.useCallback(() => {
+    Alert.alert(
+      `Exclusão de pasta - ${form.value.selectedItem?.name}`,
+      "Deseja realmente excluir essa pasta?",
+      [
+        { text: "Cancelar" },
+        {
+          text: "Deletar",
+          onPress: () => deleteMainFolderAction(),
+          style: "cancel",
+        },
+      ]
+    );
+  }, [form.value, deleteMainFolderAction]);
+
+  const handleRenameAction = useCustomAct(async () => {
+    if (!formRenameFolder.value.newName || !form.value.selectedItem?.id) {
+      throw new Error("Dados inválidos");
+    }
+
+    const id = await renameFolder(
+      form.value.selectedItem?.id,
+      formRenameFolder.value.newName
+    );
+
+    form.reset();
+    formRenameFolder.reset();
+    if (id) {
+      await getAllFolders();
+    }
+  });
 
   const onRefresh = async () => {
     form.set("refresh")(true);
@@ -86,9 +137,13 @@ export function useHomeController() {
   return {
     form,
     formCreateFolder,
+    formRenameFolder,
+    getAllFolders,
     onRefresh,
-    createFolder,
-    handleDeleteMainFolder,
-    handleCopyFolderStructure,
+    createFolderAction,
+    deleteMainFolderAction,
+    handleQuestionDelete,
+    handleRenameAction,
+    handleCopyFolderAction,
   };
 }

@@ -1,17 +1,26 @@
 import { Form } from "@/hooks/form";
 import { CreateFolderForm } from "@/services/folders/types";
+import { colors } from "@/styles/colors";
 import React from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Input } from "../input";
 import { styled } from "./styles";
 
 interface ModalCreateFolderProps {
   form: Form<CreateFolderForm>;
+  loading: boolean;
   onComplete: () => void;
 }
 
 export function ModalCreateFolder({
   form,
+  loading,
   onComplete,
 }: ModalCreateFolderProps) {
   return (
@@ -38,8 +47,16 @@ export function ModalCreateFolder({
             >
               <Text style={styled.buttonText}>Cancelar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styled.button} onPress={onComplete}>
-              <Text style={styled.buttonText}>Criar</Text>
+            <TouchableOpacity
+              style={styled.button}
+              onPress={onComplete}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color={colors.gray[100]} />
+              ) : (
+                <Text style={styled.buttonText}>Criar</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

@@ -12,7 +12,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { firestore } from "../../../firebaseConfig";
-import { FoldersRequest, FoldersResponse } from "./types";
+import { FoldersRequest, FoldersResponse, ImageProp } from "./types";
 
 export async function getFolders(): Promise<FoldersResponse[]> {
   try {
@@ -119,6 +119,7 @@ export async function deleteMainFolder(folderId: string) {
     }
 
     await deleteDoc(folderRef);
+    return folderRef.id;
   } catch (error) {
     throw error;
   }
@@ -149,7 +150,6 @@ export const copyFolderStructure = async (
   try {
     const foldersCollection = collection(firestore, "folders");
 
-    // Caso esteja criando uma nova pasta principal (sem copiar)
     if (!folderId) {
       const newFolderRef = await addDoc(foldersCollection, {
         name: folderName,
@@ -181,25 +181,61 @@ export const copyFolderStructure = async (
 
     console.log(`Nova pasta criada: ${newFolderRef.id} (cópia de ${folderId})`);
 
-    // Copiar subpastas da pasta original
     const newSubfolderIds: string[] = [];
     for (const subfolderId of subfolders || []) {
       const newSubfolderId = await copyFolderStructure(
         subfolderId,
         undefined,
         newFolderRef.id
-      ); // Chamada recursiva
+      );
       if (newSubfolderId) {
-        newSubfolderIds.push(newSubfolderId); // Adiciona o ID da subpasta copiada
+        newSubfolderIds.push(newSubfolderId);
       }
     }
 
-    // Atualizar o campo `subfolders` da nova pasta com os IDs das subpastas copiadas
     await updateDoc(newFolderRef, { subfolders: newSubfolderIds });
 
-    return newFolderRef.id; // Retorna o ID da nova pasta criada
+    return newFolderRef.id;
   } catch (error) {
     console.error("Erro ao copiar a estrutura de pastas:", error);
     throw error;
   }
 };
+
+export async function renameFolder(folderId: string, newName: string) {
+  try {
+    const foldersCollection = collection(firestore, "folders");
+
+    const folderRef = doc(foldersCollection, folderId);
+
+    await updateDoc(folderRef, {
+      name: newName,
+    });
+
+    console.log(`Pasta renomeada para "${newName}" com sucesso.`);
+    return folderId;
+  } catch (error) {
+    console.error("Erro ao renomear a pasta:", error);
+    throw error;
+  }
+}
+
+export async function updatePicuteDescription(
+  folderId: string,
+  imageData: ImageProp
+) {
+  try {
+    const foldersCollection = collection(firestore, "folders");
+
+    const folderRef = doc(foldersCollection, folderId);
+
+    await updateDoc(folderRef, {
+      images: arrayUnion(imageData),
+    });
+
+    return folderId;
+  } catch (error) {
+    console.error("Erro ao fazer update", error);
+    return [];
+  }
+}

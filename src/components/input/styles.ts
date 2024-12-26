@@ -1,8 +1,10 @@
 import { colors } from "@/styles/colors";
+import { fontFamily } from "@/styles/font-family";
 import { StyleSheet } from "react-native";
 
 export const styled = StyleSheet.create({
   input: {
+    fontFamily: fontFamily.medium,
     maxHeight: 50,
     height: 50,
     backgroundColor: colors.gray[200],

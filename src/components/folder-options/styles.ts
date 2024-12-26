@@ -1,4 +1,5 @@
 import { colors } from "@/styles/colors";
+import { fontFamily } from "@/styles/font-family";
 import { StyleSheet } from "react-native";
 
 export const styled = StyleSheet.create({
@@ -15,19 +16,40 @@ export const styled = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
+
+  titleContainer: {
+    flexDirection: "row",
     marginBottom: 20,
   },
-  input: {
+
+  title: {
+    flex: 1,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 20,
+  },
+
+  renameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     width: "100%",
-    padding: 10,
+    gap: 4,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: colors.gray[200],
     borderRadius: 5,
     marginBottom: 20,
+    maxHeight: 58,
   },
+
+  renameInput: {
+    flex: 1,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 20,
+    backgroundColor: "transparent",
+    width: "100%",
+    padding: 10,
+  },
+
   buttonContainer: {
     width: "100%",
     gap: 8,
@@ -40,6 +62,8 @@ export const styled = StyleSheet.create({
     borderRadius: 5,
     width: "100%",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
 
   button: {
@@ -59,11 +83,14 @@ export const styled = StyleSheet.create({
   },
 
   buttonText: {
+    fontFamily: fontFamily.medium,
     color: "white",
     fontSize: 16,
   },
 
   buttonTextCancel: {
+    fontFamily: fontFamily.medium,
+
     color: colors.gray[600],
     fontSize: 16,
   },
