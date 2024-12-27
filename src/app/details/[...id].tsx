@@ -1,4 +1,5 @@
 import { Button } from "@/components/button";
+import { EmptyFolder } from "@/components/empty-folders";
 import { Folder } from "@/components/folder";
 import { ModalFolderOptions } from "@/components/folder-options";
 import { Header } from "@/components/header";
@@ -40,6 +41,7 @@ export default function FolderDetails() {
     handleQuestionDeleteImage,
     handleSharePicture,
     handleTakePicture,
+    handleRenamePicutreDescription,
   } = usePictureController({ onRefresh, form });
 
   const pathname = usePathname();
@@ -107,6 +109,8 @@ export default function FolderDetails() {
           renderItem={() => <Skeleton />}
           showsVerticalScrollIndicator={false}
         />
+      ) : !itemsToRender.length ? (
+        <EmptyFolder isSubFolders />
       ) : (
         <FlatList
           data={itemsToRender}
@@ -206,6 +210,7 @@ export default function FolderDetails() {
           loadingDelete={handleDeletePictureAction.loading}
           onDelete={handleQuestionDeleteImage}
           onShare={handleSharePicture}
+          onChangeDescription={handleRenamePicutreDescription}
           shareLoading={handleSharePicture.loading}
         />
       )}

@@ -29,10 +29,36 @@ export const styled = StyleSheet.create({
     fontFamily: fontFamily.medium,
     color: colors.gray[600],
     fontSize: 14,
+    flex: 1,
   },
 
   buttonContainer: {
     width: "100%",
     gap: 8,
+  },
+
+  titleContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+
+  changeDescriptionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    borderRadius: 5,
+    marginBottom: 20,
+    maxHeight: 58,
+  },
+
+  changeDescriptionInput: {
+    flex: 1,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 16,
+    backgroundColor: "transparent",
+    width: "100%",
+    padding: 10,
   },
 });

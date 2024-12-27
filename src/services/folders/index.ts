@@ -247,3 +247,36 @@ export async function updatePicuteDescription(
     return [];
   }
 }
+
+export async function renamePicuteDescription(
+  folderId: string,
+  imageId: string,
+  newDescription: string
+) {
+  try {
+    const foldersCollection = collection(firestore, "folders");
+    const folderRef = doc(foldersCollection, folderId);
+
+    // Obter o documento atual para localizar o array de imagens
+    const folderSnapshot = await getDoc(folderRef);
+    if (!folderSnapshot.exists()) {
+      throw new Error("Pasta não encontrada");
+    }
+
+    const folderData = folderSnapshot.data();
+    const images = folderData.images || [];
+
+    // Atualizar a descrição da imagem correspondente no array
+    const updatedImages = images.map((image: any) =>
+      image.id === imageId ? { ...image, description: newDescription } : image
+    );
+
+    // Atualizar o documento no Firestore
+    await updateDoc(folderRef, { images: updatedImages });
+
+    return folderId;
+  } catch (error) {
+    console.error("Erro ao fazer update no Firestore:", error);
+    throw error;
+  }
+}

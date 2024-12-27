@@ -1,6 +1,10 @@
-import { updatePicuteDescription } from "@/services/folders";
+import {
+  renamePicuteDescription,
+  updatePicuteDescription,
+} from "@/services/folders";
 import { ImageBase, ImageProp } from "@/services/folders/types";
 import { deleteImage, uploadTakePicture } from "@/services/pictures";
+import { Photo } from "@/services/pictures/types";
 import { useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
@@ -15,23 +19,11 @@ import { useCustomAct } from "../http";
 export interface FormCamera {
   camera: boolean;
   progress: number;
-  photo:
-    | {
-        base64: string;
-        exif?: {
-          ImageLength: number;
-          ImageWidth: number;
-          LightSource: number;
-          Orientation: number;
-          [key: string]: any;
-        };
-        height: number;
-        uri: string;
-        width: number;
-      }
-    | undefined;
+  photo: Photo | undefined;
   selectedPicture: Partial<ImageBase> | undefined;
   modalOptionsPicture: boolean;
+  newDescription: string;
+  changeDescription: boolean;
 }
 
 interface usePictureController {
@@ -54,6 +46,8 @@ export function usePictureController({
     progress: 0,
     selectedPicture: undefined,
     modalOptionsPicture: false,
+    newDescription: "",
+    changeDescription: false,
   });
 
   const handleOpenCamera = React.useCallback(async () => {
@@ -238,6 +232,38 @@ export function usePictureController({
     }
   });
 
+  const handleRenamePicutreDescription = useCustomAct(async () => {
+    if (!formCamera.value.selectedPicture?.uri) {
+      throw new Error("Nenhuma foto selecionada");
+    }
+
+    const decodedUri = decodeURIComponent(formCamera.value.selectedPicture.uri);
+
+    const fileName = decodedUri.split("/").pop();
+    const idImage = fileName?.split("?")[0];
+
+    if (!idImage) {
+      throw new Error("Erro ao encontrar a imagem");
+    }
+
+    const folderId = params.id[params.id.length - 1];
+
+    try {
+      const updatedFolderId = await renamePicuteDescription(
+        folderId,
+        idImage,
+        formCamera.value.newDescription
+      );
+
+      if (updatedFolderId) {
+        formCamera.reset();
+        onRefresh();
+      }
+    } catch (error) {
+      console.error("Erro ao renomear descrição:", error);
+    }
+  });
+
   React.useEffect(() => {
     if (formCamera.value.progress >= 100) {
       formCamera.setAll({
@@ -261,5 +287,6 @@ export function usePictureController({
     handleTakePicture,
     handleSharePicture,
     handleOpenCamera,
+    handleRenamePicutreDescription,
   };
 }

@@ -1,3 +1,4 @@
+import { EmptyFolder } from "@/components/empty-folders";
 import { Folder } from "@/components/folder";
 import { ModalFolderOptions } from "@/components/folder-options";
 import { Header } from "@/components/header";
@@ -23,6 +24,10 @@ export default function Home() {
     handleRenameAction,
   } = useHomeController();
 
+  const filteredFolders = React.useMemo(() => {
+    return form.value.folders.filter((folder) => !folder.parentId);
+  }, [form.value.folders]);
+
   return (
     <View style={{ flex: 1, padding: 24, gap: 24 }}>
       <Header
@@ -43,6 +48,8 @@ export default function Home() {
           renderItem={() => <Skeleton />}
           showsVerticalScrollIndicator={false}
         />
+      ) : filteredFolders.length === 0 ? (
+        <EmptyFolder />
       ) : (
         <FlatList
           data={form.value.folders.filter((folder) => !folder.parentId)}
