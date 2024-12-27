@@ -5,7 +5,7 @@ export const styled = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 18,
   },
   skeletonContainer: {
     width: 164,

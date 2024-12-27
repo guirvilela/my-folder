@@ -70,7 +70,9 @@ export function useHomeController() {
 
     const id = await copyFolderStructure(
       form.value.selectedItem?.id,
-      formCreateFolder.value.nameFolder ?? "Nova pasta"
+      formCreateFolder.value.nameFolder ?? "Nova pasta",
+      null,
+      true
     );
 
     form.reset();
@@ -99,7 +101,7 @@ export function useHomeController() {
       [
         { text: "Cancelar" },
         {
-          text: "Deletar",
+          text: "Excluir",
           onPress: () => deleteMainFolderAction(),
           style: "cancel",
         },

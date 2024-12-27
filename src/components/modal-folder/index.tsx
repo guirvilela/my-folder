@@ -44,6 +44,7 @@ export function ModalCreateFolder({
             <TouchableOpacity
               style={styled.buttonCancel}
               onPress={() => form.reset()}
+              disabled={loading}
             >
               <Text style={styled.buttonText}>Cancelar</Text>
             </TouchableOpacity>

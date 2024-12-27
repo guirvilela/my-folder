@@ -1,4 +1,3 @@
-// Primeiro, defina a interface base para imagens
 export interface ImageBase {
   id?: string;
   uri: string;
@@ -6,7 +5,6 @@ export interface ImageBase {
   createdAt?: string;
 }
 
-// Atualize a FoldersResponse para usar a ImageBase
 export interface FoldersResponse {
   id: string;
   name: string;
@@ -15,12 +13,10 @@ export interface FoldersResponse {
   parentId: string;
 }
 
-// ImageProp pode estender ImageBase se precisar de propriedades adicionais
 export interface ImageProp extends ImageBase {
   name?: string;
 }
 
-// Resto das interfaces permanece igual
 export interface FoldersRequest {
   name: string;
   images: ImageProp[];
@@ -35,4 +31,13 @@ export interface CreateFolderForm {
 export interface RenameFolderForm {
   newName: string;
   rename: boolean;
+}
+
+export interface ImageFormattedProps {
+  image: {
+    createdAt: string;
+    description: string;
+    uri: string;
+  };
+  type: string;
 }

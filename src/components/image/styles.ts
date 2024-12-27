@@ -11,7 +11,6 @@ export const styled = StyleSheet.create({
     marginBottom: 14,
     maxWidth: 164,
     height: 160,
-    // borderRadius: 10,
   },
   image: {
     width: 164,
@@ -20,23 +19,6 @@ export const styled = StyleSheet.create({
     borderRadius: 10,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-  },
-
-  imageNoDescription: {
-    width: 164,
-    height: 180,
-    maxWidth: 164,
-    borderRadius: 10,
-  },
-
-  containerNoDescription: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    width: 164,
-    maxWidth: 164,
-    height: 180,
-    borderRadius: 10,
   },
 
   descriptionContainer: {

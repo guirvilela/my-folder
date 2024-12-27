@@ -15,37 +15,20 @@ export const styled = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     alignItems: "center",
+    gap: 16,
   },
 
-  titleContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
+  image: {
+    width: 140,
+    height: 140,
+    maxWidth: 140,
+    borderRadius: 10,
   },
 
-  title: {
-    flex: 1,
-    fontFamily: fontFamily.semiBold,
-    fontSize: 20,
-  },
-
-  renameContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderRadius: 5,
-    marginBottom: 20,
-    maxHeight: 58,
-  },
-
-  renameInput: {
-    flex: 1,
-    fontFamily: fontFamily.semiBold,
-    fontSize: 20,
-    backgroundColor: "transparent",
-    width: "100%",
-    padding: 10,
+  textDescription: {
+    fontFamily: fontFamily.medium,
+    color: colors.gray[600],
+    fontSize: 14,
   },
 
   buttonContainer: {

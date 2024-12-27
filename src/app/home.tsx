@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { ModalCreateFolder } from "@/components/modal-folder";
 import { Skeleton } from "@/components/skeleton";
 import { useHomeController } from "@/hooks/home";
-import { IconFolderFilled } from "@tabler/icons-react-native";
+import { IconFolder } from "@tabler/icons-react-native";
 import { router } from "expo-router";
 import React from "react";
 import { FlatList, RefreshControl, View } from "react-native";
@@ -55,7 +55,7 @@ export default function Home() {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <Folder
-              icon={IconFolderFilled}
+              icon={IconFolder}
               description={item.name}
               onNavigate={() =>
                 router.push({

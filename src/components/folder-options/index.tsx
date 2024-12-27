@@ -1,15 +1,10 @@
 import { Form } from "@/hooks/form";
 import { RenameFolderForm } from "@/services/folders/types";
 import { colors } from "@/styles/colors";
-import { IconCheck, IconPencil, IconX } from "@tabler/icons-react-native";
+import { IconPencil } from "@tabler/icons-react-native";
 import React from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Modal, Text, View } from "react-native";
+import { Button } from "../button";
 import { Input } from "../input";
 import { styled } from "./styles";
 
@@ -69,61 +64,62 @@ export function ModalFolderOptions({
                 style={styled.renameInput}
                 autoFocus
               />
-              <IconX
-                color={colors.gray[400]}
-                onPress={() =>
-                  form.setAll({
-                    rename: false,
-                    newName: name,
-                  })
-                }
-              />
-              <IconCheck
-                color={colors.green.base}
-                onPress={() => {
-                  form.reset(), onRename();
-                }}
-              />
             </View>
           )}
 
           <View style={styled.buttonContainer}>
-            {!isSubFolder && (
-              <TouchableOpacity
-                style={styled.defaultButton}
+            {!isSubFolder && !form.value.rename && (
+              <Button
+                variant="default"
                 onPress={onCopy}
                 disabled={isLoadingDisabled || form.value.rename}
               >
                 {loadingCopyFolder ? (
                   <ActivityIndicator size="small" color={colors.gray[400]} />
                 ) : (
-                  <Text style={styled.buttonTextCancel}>Copiar pasta</Text>
+                  <Button.Title variant="default">Copiar pasta</Button.Title>
                 )}
-              </TouchableOpacity>
+              </Button>
             )}
 
-            <TouchableOpacity
-              style={styled.buttonDelete}
-              onPress={onDelete}
-              disabled={isLoadingDisabled || form.value.rename}
-            >
-              {loadingDelete ? (
-                <ActivityIndicator size="small" color={colors.gray[100]} />
-              ) : (
-                <Text style={styled.buttonText}>Excluir pasta</Text>
-              )}
-            </TouchableOpacity>
+            {form.value.rename ? (
+              <Button
+                variant="rename"
+                onPress={() => {
+                  onRename();
+                  form.reset();
+                }}
+              >
+                <Button.Title>Renomear</Button.Title>
+              </Button>
+            ) : (
+              <Button
+                variant="delete"
+                onPress={onDelete}
+                disabled={isLoadingDisabled || form.value.rename}
+              >
+                {loadingDelete ? (
+                  <ActivityIndicator size="small" color={colors.gray[100]} />
+                ) : (
+                  <Button.Title>Excluir pasta</Button.Title>
+                )}
+              </Button>
+            )}
 
-            <TouchableOpacity
-              style={styled.button}
+            <Button
+              variant="cancel"
               onPress={() => {
-                onCloseOptions();
-                form.reset();
+                form.value.rename
+                  ? form.setAll({
+                      rename: false,
+                      newName: name,
+                    })
+                  : (onCloseOptions(), form.reset());
               }}
               disabled={isLoadingDisabled}
             >
-              <Text style={styled.buttonTextCancel}>Cancelar</Text>
-            </TouchableOpacity>
+              <Button.Title variant="cancel">Cancelar</Button.Title>
+            </Button>
           </View>
         </View>
       </View>

@@ -4,7 +4,7 @@ import { getStatusBarHeight } from "react-native-status-bar-height";
 
 export const styled = StyleSheet.create({
   arrow: {
-    paddingTop: Platform.OS === "ios" ? getStatusBarHeight() + 16 : 0,
+    paddingTop: Platform.OS === "ios" ? getStatusBarHeight() + 8 : 0,
     width: 26,
     height: 26,
   },
@@ -13,6 +13,7 @@ export const styled = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: Platform.OS === "ios" ? 24 : 0,
   },
   title: {
     color: colors.gray[500],

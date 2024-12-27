@@ -3,21 +3,19 @@ import { Folder } from "@/components/folder";
 import { ModalFolderOptions } from "@/components/folder-options";
 import { Header } from "@/components/header";
 import { Image } from "@/components/image";
+import { ModalImagesOptions } from "@/components/images-options";
 import { ModalCamera } from "@/components/modal-camera";
 import { ModalCreateFolder } from "@/components/modal-folder";
 import { PhotoPreview } from "@/components/photo-preview";
 import { Skeleton } from "@/components/skeleton";
 import { useDetailsController } from "@/hooks/details";
 import { usePictureController } from "@/hooks/picture";
+import { ImageBase } from "@/services/folders/types";
 
-import {
-  IconCamera,
-  IconFolderFilled,
-  IconUpload,
-} from "@tabler/icons-react-native";
+import { IconCamera, IconFolder, IconUpload } from "@tabler/icons-react-native";
 import { router, usePathname } from "expo-router";
 import React from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { FlatList, RefreshControl, StatusBar, View } from "react-native";
 
 export default function FolderDetails() {
   const {
@@ -38,6 +36,8 @@ export default function FolderDetails() {
     handleOpenCamera,
     handleSavePictureAction,
     handleUploadPictureAction,
+    handleDeletePictureAction,
+    handleQuestionDeleteImage,
     handleSharePicture,
     handleTakePicture,
   } = usePictureController({ onRefresh, form });
@@ -48,9 +48,17 @@ export default function FolderDetails() {
     if (!form.value.folder) return [];
     const { subfolders, images } = form.value.folder;
 
+    const sortedImages: ImageBase[] =
+      images?.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : -Infinity;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : -Infinity;
+
+        return dateB - dateA;
+      }) || [];
+
     return [
       ...(subfolders?.map((folder) => ({ ...folder, type: "folder" })) || []),
-      ...(images?.map((image) => ({ image, type: "image" })) || []),
+      ...(sortedImages.map((image) => ({ image, type: "image" })) || []),
     ];
   }, [form.value.folder]);
 
@@ -62,7 +70,7 @@ export default function FolderDetails() {
   const renderFolderItem = (folder: any, currentPath: string) => {
     return (
       <Folder
-        icon={IconFolderFilled}
+        icon={IconFolder}
         description={folder.name}
         onNavigate={() => {
           handleNavigate(folder.id, currentPath);
@@ -79,6 +87,7 @@ export default function FolderDetails() {
 
   return (
     <View style={{ flex: 1, padding: 24, gap: 18 }}>
+      <StatusBar barStyle="dark-content" />
       <Header
         isSubFolder
         title={form.value.folder?.name}
@@ -124,6 +133,16 @@ export default function FolderDetails() {
                   onLoadEnd={() => form.set("loadingImages")(false)}
                   description={description}
                   createdAt={createdAt}
+                  onLongPress={() =>
+                    formCamera.setAll({
+                      modalOptionsPicture: true,
+                      selectedPicture: {
+                        uri,
+                        description,
+                        createdAt,
+                      } as Partial<ImageBase>,
+                    })
+                  }
                 />
               );
             }
@@ -163,6 +182,7 @@ export default function FolderDetails() {
         cameraRef={cameraRef}
         onTakePicture={handleTakePicture}
       />
+
       {formCamera.value.photo && (
         <PhotoPreview
           formCamera={formCamera}
@@ -172,20 +192,31 @@ export default function FolderDetails() {
           saveAction={handleSavePictureAction}
         />
       )}
+
       <ModalCreateFolder
         form={formCreateFolder}
         onComplete={createSubFolderAction}
         loading={createSubFolderAction.loading}
       />
+
+      {formCamera.value.modalOptionsPicture && (
+        <ModalImagesOptions
+          opened={formCamera.value.modalOptionsPicture}
+          formCamera={formCamera}
+          loadingDelete={handleDeletePictureAction.loading}
+          onDelete={handleQuestionDeleteImage}
+        />
+      )}
+
       {form.value.modalOptions && (
         <ModalFolderOptions
           opened={form.value.modalOptions}
+          form={formRenameFolder}
           name={form.value.selectedItem?.name ?? ""}
           onCloseOptions={() => form.set("modalOptions")(false)}
           onDelete={handleQuestionDelete}
           isSubFolder
           loadingDelete={deleteSubFolderAction.loading}
-          form={formRenameFolder}
           onRename={handleRenameAction}
         />
       )}

@@ -18,18 +18,16 @@ export function Folder({
   onLongPress,
 }: FolderProps) {
   return (
-    <>
-      <TouchableOpacity
-        style={styled.container}
-        activeOpacity={0.8}
-        onPress={onNavigate}
-        onLongPress={onLongPress}
-      >
-        <Icon color={colors.gray[500]} size={58} />
-        <Text style={styled.description} numberOfLines={2}>
-          {description}
-        </Text>
-      </TouchableOpacity>
-    </>
+    <TouchableOpacity
+      style={styled.container}
+      activeOpacity={0.8}
+      onPress={onNavigate}
+      onLongPress={onLongPress}
+    >
+      <Icon color={colors.gray[500]} size={58} />
+      <Text style={styled.description} numberOfLines={2}>
+        {description}
+      </Text>
+    </TouchableOpacity>
   );
 }

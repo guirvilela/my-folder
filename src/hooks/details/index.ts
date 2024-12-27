@@ -133,7 +133,7 @@ export function useDetailsController() {
       [
         { text: "Cancelar" },
         {
-          text: "Deletar",
+          text: "Excluir",
           onPress: () => deleteSubFolderAction(),
           style: "cancel",
         },

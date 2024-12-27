@@ -1,19 +1,19 @@
 import { updatePicuteDescription } from "@/services/folders";
-import { ImageProp } from "@/services/folders/types";
-import { uploadTakePicture } from "@/services/pictures";
+import { ImageBase, ImageProp } from "@/services/folders/types";
+import { deleteImage, uploadTakePicture } from "@/services/pictures";
 import { useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams } from "expo-router";
-import { shareAsync } from "expo-sharing";
 import React, { useRef } from "react";
-import { Alert } from "react-native";
+import { Alert, Keyboard, Share } from "react-native";
 import { FoldersForm } from "../details";
 import { Form, useForm } from "../form";
 import { useCustomAct } from "../http";
 
 export interface FormCamera {
   camera: boolean;
+  progress: number;
   photo:
     | {
         base64: string;
@@ -29,6 +29,8 @@ export interface FormCamera {
         width: number;
       }
     | undefined;
+  selectedPicture: Partial<ImageBase> | undefined;
+  modalOptionsPicture: boolean;
 }
 
 interface usePictureController {
@@ -48,6 +50,9 @@ export function usePictureController({
   const formCamera = useForm<FormCamera>({
     camera: false,
     photo: undefined,
+    progress: 0,
+    selectedPicture: undefined,
+    modalOptionsPicture: false,
   });
 
   const handleOpenCamera = React.useCallback(async () => {
@@ -66,9 +71,24 @@ export function usePictureController({
     }
   }, [formCamera.value]);
 
-  const handleSharePicture = () => {
-    if (formCamera.value.photo?.uri) {
-      shareAsync(formCamera.value.photo?.uri);
+  const handleSharePicture = async () => {
+    try {
+      if (formCamera.value.photo?.uri) {
+        const description = form.value.pictureDescription || "";
+
+        const result = await Share.share({
+          message: description,
+          url: formCamera.value.photo?.uri,
+        });
+
+        if (result.action === Share.sharedAction) {
+          console.log("Imagem e texto compartilhados com sucesso.");
+        } else if (result.action === Share.dismissedAction) {
+          console.log("O compartilhamento foi cancelado.");
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao compartilhar:", error);
     }
   };
 
@@ -84,11 +104,13 @@ export function usePictureController({
       formCamera.setAll({
         photo: newPhoto,
         camera: false,
+        progress: 0,
       });
     }
   }, [cameraRef, formCamera]);
 
   const handleSavePictureAction = useCustomAct(async () => {
+    Keyboard.dismiss();
     try {
       if (!formCamera.value.photo) {
         throw new Error("Nenhuma foto selecionada");
@@ -99,10 +121,9 @@ export function usePictureController({
       const photoURL = await uploadTakePicture(
         formCamera.value.photo.uri,
         fileName,
-        params.id
+        params.id,
+        (progress) => formCamera.set("progress")(progress)
       );
-
-      console.log("URL da foto salva:", photoURL);
 
       const imageData: ImageProp = {
         id: fileName,
@@ -113,15 +134,6 @@ export function usePictureController({
 
       const idToFetch = params.id[params.id.length - 1];
       await updatePicuteDescription(idToFetch, imageData);
-
-      formCamera.setAll({
-        photo: undefined,
-        camera: false,
-      });
-
-      form.set("pictureDescription")("");
-
-      onRefresh();
 
       return photoURL;
     } catch (error) {
@@ -134,7 +146,6 @@ export function usePictureController({
     try {
       const idToFetch = params.id[params.id.length - 1];
 
-      // Verificar se o ID é válido
       if (!idToFetch) {
         throw new Error("ID inválido");
       }
@@ -163,11 +174,67 @@ export function usePictureController({
     }
   });
 
+  const handleQuestionDeleteImage = React.useCallback(() => {
+    Alert.alert(`Exclusão de foto`, "Deseja realmente excluir essa foto?", [
+      { text: "Cancelar" },
+      {
+        text: "Excluir",
+        onPress: () => handleDeletePictureAction(),
+        style: "cancel",
+      },
+    ]);
+  }, [formCamera.value]);
+
+  const handleDeletePictureAction = useCustomAct(async () => {
+    Keyboard.dismiss();
+    try {
+      if (!formCamera.value.selectedPicture?.uri) {
+        throw new Error("Nenhuma foto selecionada");
+      }
+
+      const decodedUri = decodeURIComponent(
+        formCamera.value.selectedPicture.uri
+      );
+
+      const fileName = decodedUri.split("/").pop();
+
+      const idImage = fileName?.split("?")[0];
+
+      if (!idImage) {
+        throw new Error("Erro ao encontrar image");
+      }
+
+      const imageDeleted = await deleteImage(params.id, idImage);
+
+      if (imageDeleted) {
+        formCamera.reset(), onRefresh();
+      }
+    } catch (error) {
+      console.error("Erro ao salvar foto:", error);
+      throw error;
+    }
+  });
+
+  React.useEffect(() => {
+    if (formCamera.value.progress >= 100) {
+      formCamera.setAll({
+        photo: undefined,
+        camera: false,
+        progress: 0,
+      });
+      form.set("pictureDescription")("");
+
+      onRefresh();
+    }
+  }, [formCamera.value.progress]);
+
   return {
     formCamera,
     cameraRef,
     handleSavePictureAction,
     handleUploadPictureAction,
+    handleDeletePictureAction,
+    handleQuestionDeleteImage,
     handleTakePicture,
     handleSharePicture,
     handleOpenCamera,

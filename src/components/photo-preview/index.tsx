@@ -4,9 +4,10 @@ import { Action } from "@/hooks/http";
 import { FormCamera } from "@/hooks/picture";
 import { colors } from "@/styles/colors";
 import { IconSend2, IconShare, IconX } from "@tabler/icons-react-native";
-import { Image, SafeAreaView, View } from "react-native";
+import { Image, KeyboardAvoidingView, View } from "react-native";
 import { Button } from "../button";
 import { Input } from "../input";
+import { CircularProgress } from "../loadingProgress";
 import { styled } from "./style";
 
 interface PhotoPreviewProps {
@@ -25,14 +26,16 @@ export function PhotoPreview({
   onShare,
 }: PhotoPreviewProps) {
   return (
-    <SafeAreaView style={styled.container}>
+    <KeyboardAvoidingView style={styled.container} behavior="padding">
+      {/* <SafeAreaView> */}
       <Button
         disabled={saveAction.loading}
         style={styled.buttonClose}
         onPress={() => {
           formCamera.setAll({
             photo: undefined,
-            camera: false,
+            camera: true,
+            progress: 0,
           });
         }}
       >
@@ -78,6 +81,13 @@ export function PhotoPreview({
           </Button>
         </View>
       </View>
-    </SafeAreaView>
+
+      {formCamera.value.progress > 0 && (
+        <View style={styled.circularLoadingContainer}>
+          <CircularProgress progress={formCamera.value.progress} />
+        </View>
+      )}
+      {/* </SafeAreaView> */}
+    </KeyboardAvoidingView>
   );
 }

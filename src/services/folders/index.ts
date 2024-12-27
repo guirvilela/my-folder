@@ -145,11 +145,13 @@ export async function deleteSubFolder(folderId: string, parentId: string) {
 export const copyFolderStructure = async (
   folderId?: string | null,
   folderName?: string,
-  newParentId: string | null = null
+  newParentId: string | null = null,
+  isMainFolder?: boolean
 ) => {
   try {
     const foldersCollection = collection(firestore, "folders");
 
+    // Caso a pasta não exista, cria uma nova pasta principal
     if (!folderId) {
       const newFolderRef = await addDoc(foldersCollection, {
         name: folderName,
@@ -170,29 +172,35 @@ export const copyFolderStructure = async (
     }
 
     const folderData = folderSnapshot.data();
-
     const { name, subfolders, ...restData } = folderData;
+
+    // Se for a pasta principal, adiciona o sufixo '- cópia'
+    const newFolderName = isMainFolder ? `${name} - cópia` : name;
+
     const newFolderRef = await addDoc(foldersCollection, {
       ...restData,
-      name: name,
-      parentId: newParentId,
-      subfolders: [],
+      name: newFolderName,
+      parentId: newParentId, // Certificando-se de que o parentId está correto
+      subfolders: [], // Inicializa as subpastas como vazias por enquanto
     });
 
     console.log(`Nova pasta criada: ${newFolderRef.id} (cópia de ${folderId})`);
 
     const newSubfolderIds: string[] = [];
     for (const subfolderId of subfolders || []) {
+      // Recursivamente copia as subpastas, passando o ID da nova pasta como novo parentId
       const newSubfolderId = await copyFolderStructure(
         subfolderId,
         undefined,
-        newFolderRef.id
+        newFolderRef.id, // Aqui passa o ID da pasta recém-criada como novo parentId
+        false // Passa false para não adicionar sufixo nas subpastas
       );
       if (newSubfolderId) {
         newSubfolderIds.push(newSubfolderId);
       }
     }
 
+    // Atualiza a nova pasta com as subpastas copiadas
     await updateDoc(newFolderRef, { subfolders: newSubfolderIds });
 
     return newFolderRef.id;

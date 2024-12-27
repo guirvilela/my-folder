@@ -9,6 +9,7 @@ interface ImageProps {
   createdAt?: string;
   onLoading: () => void;
   onLoadEnd: () => void;
+  onLongPress: () => void;
 }
 
 export function Image({
@@ -17,32 +18,30 @@ export function Image({
   createdAt,
   onLoading,
   onLoadEnd,
+  onLongPress,
 }: ImageProps) {
   return (
     <TouchableOpacity
-      style={description ? styled.container : styled.containerNoDescription}
+      style={styled.container}
       activeOpacity={0.8}
+      onLongPress={onLongPress}
     >
       <RNImage
         source={{ uri }}
-        style={description ? styled.image : styled.imageNoDescription}
+        style={styled.image}
         resizeMode="cover"
         onLoad={onLoading}
         onLoadEnd={onLoadEnd}
       />
 
-      {description ? (
-        <View style={styled.descriptionContainer}>
-          <Text style={styled.description} numberOfLines={1}>
-            {description}
-          </Text>
-          <View style={styled.createdAt}>
-            <Text style={styled.createdAtText}>{formatDate(createdAt)}</Text>
-          </View>
+      <View style={styled.descriptionContainer}>
+        <Text style={styled.description} numberOfLines={1}>
+          {description || "Sem descrição"}
+        </Text>
+        <View style={styled.createdAt}>
+          <Text style={styled.createdAtText}>{formatDate(createdAt)}</Text>
         </View>
-      ) : (
-        <Text style={styled.description}>{description}</Text>
-      )}
+      </View>
     </TouchableOpacity>
   );
 }

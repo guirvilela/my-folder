@@ -1,5 +1,5 @@
 import { colors } from "@/styles/colors";
-import { IconArrowLeft, IconPlus } from "@tabler/icons-react-native";
+import { IconArrowLeft, IconFolderPlus } from "@tabler/icons-react-native";
 import { router } from "expo-router";
 import { Text, TouchableHighlight, View } from "react-native";
 import { Button } from "../button";
@@ -35,7 +35,7 @@ export function Header({
           style={{ padding: 10, height: 42 }}
           onPress={onOpenModalCreateFolder}
         >
-          <Button.Icon icon={IconPlus} />
+          <Button.Icon icon={IconFolderPlus} />
           <Button.Title>Pasta</Button.Title>
         </Button>
       </View>

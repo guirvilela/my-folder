@@ -89,4 +89,14 @@ export const styled = StyleSheet.create({
     fontFamily: fontFamily.medium,
     backgroundColor: colors.gray[600],
   },
+
+  circularLoadingContainer: {
+    position: "absolute",
+    left: "50%",
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    justifyContent: "center",
+    alignItems: "center",
+    width: 100,
+    height: 100,
+  },
 });
