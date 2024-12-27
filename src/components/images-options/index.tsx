@@ -16,15 +16,24 @@ interface ModalImagesOptionsProps {
   formCamera: Form<FormCamera>;
   opened: boolean;
   loadingDelete: boolean;
+  shareLoading: boolean;
   onDelete: () => void;
+  onShare: () => void;
 }
 
 export function ModalImagesOptions({
   opened,
   formCamera,
   loadingDelete,
+  shareLoading,
   onDelete,
+  onShare,
 }: ModalImagesOptionsProps) {
+  const isLoadingDisabled = React.useMemo(
+    () => loadingDelete || shareLoading,
+    [loadingDelete, shareLoading]
+  );
+
   return (
     <Modal visible={opened} animationType="fade" transparent={true}>
       <View style={styled.modalBackdrop}>
@@ -42,15 +51,19 @@ export function ModalImagesOptions({
           <View style={styled.buttonContainer}>
             <Button
               variant="default"
-              onPress={onDelete}
-              disabled={loadingDelete}
+              onPress={onShare}
+              disabled={isLoadingDisabled}
             >
-              <Button.Title variant="cancel">Compartilhar</Button.Title>
+              {shareLoading ? (
+                <ActivityIndicator size="small" color={colors.gray[100]} />
+              ) : (
+                <Button.Title variant="cancel">Compartilhar</Button.Title>
+              )}
             </Button>
 
             <Button
               onPress={onDelete}
-              disabled={loadingDelete}
+              disabled={isLoadingDisabled}
               variant="delete"
             >
               {loadingDelete ? (
@@ -62,7 +75,7 @@ export function ModalImagesOptions({
 
             <Button
               onPress={() => formCamera.reset()}
-              disabled={loadingDelete}
+              disabled={isLoadingDisabled}
               variant="cancel"
             >
               <Button.Title variant="cancel"> Cancelar</Button.Title>

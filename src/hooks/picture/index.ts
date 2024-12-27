@@ -2,11 +2,12 @@ import { updatePicuteDescription } from "@/services/folders";
 import { ImageBase, ImageProp } from "@/services/folders/types";
 import { deleteImage, uploadTakePicture } from "@/services/pictures";
 import { useCameraPermissions } from "expo-camera";
+import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams } from "expo-router";
 import React, { useRef } from "react";
-import { Alert, Keyboard, Share } from "react-native";
+import { Alert, Keyboard, Platform, Share } from "react-native";
 import { FoldersForm } from "../details";
 import { Form, useForm } from "../form";
 import { useCustomAct } from "../http";
@@ -71,26 +72,48 @@ export function usePictureController({
     }
   }, [formCamera.value]);
 
-  const handleSharePicture = async () => {
+  const handleSharePicture = useCustomAct(async () => {
     try {
+      const description = formCamera.value.photo?.uri
+        ? form.value.pictureDescription
+        : formCamera.value.selectedPicture?.description || "";
+
       if (formCamera.value.photo?.uri) {
-        const description = form.value.pictureDescription || "";
-
-        const result = await Share.share({
+        const shareOptions = {
           message: description,
-          url: formCamera.value.photo?.uri,
-        });
+          ...(Platform.OS === "ios"
+            ? { url: formCamera.value.photo.uri }
+            : { files: [formCamera.value.photo.uri] }),
+        };
+        await Share.share(shareOptions);
+      } else if (formCamera.value.selectedPicture?.uri) {
+        const fileExtension = formCamera.value.selectedPicture.uri
+          .split(".")
+          .pop();
+        const localFileName = `temp_image_${Date.now()}.${fileExtension}`;
+        const localFilePath = `${FileSystem.cacheDirectory}${localFileName}`;
 
-        if (result.action === Share.sharedAction) {
-          console.log("Imagem e texto compartilhados com sucesso.");
-        } else if (result.action === Share.dismissedAction) {
-          console.log("O compartilhamento foi cancelado.");
+        const downloadResult = await FileSystem.downloadAsync(
+          formCamera.value.selectedPicture.uri,
+          localFilePath
+        );
+
+        if (downloadResult.status === 200) {
+          const shareOptions = {
+            message: description,
+            ...(Platform.OS === "ios"
+              ? { url: downloadResult.uri }
+              : { files: [downloadResult.uri] }),
+          };
+          await Share.share(shareOptions);
+
+          await FileSystem.deleteAsync(localFilePath, { idempotent: true });
         }
       }
     } catch (error) {
       console.error("Erro ao compartilhar:", error);
     }
-  };
+  });
 
   const handleTakePicture = React.useCallback(async () => {
     const options = {

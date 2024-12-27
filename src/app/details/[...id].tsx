@@ -205,6 +205,8 @@ export default function FolderDetails() {
           formCamera={formCamera}
           loadingDelete={handleDeletePictureAction.loading}
           onDelete={handleQuestionDeleteImage}
+          onShare={handleSharePicture}
+          shareLoading={handleSharePicture.loading}
         />
       )}
 
