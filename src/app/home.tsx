@@ -32,13 +32,11 @@ export default function Home() {
         const numB = parseInt(b.name.match(/\d+/)?.[0] || "0", 10);
 
         if (numA && numB) {
-          return numA - numB; // Ordena por número se ambos possuem números
+          return numA - numB;
         }
-        return a.name.localeCompare(b.name); // Ordena alfabeticamente caso contrário
+        return a.name.localeCompare(b.name);
       });
   }, [form.value.folders]);
-
-  console.log(filteredFolders);
 
   return (
     <View style={{ flex: 1, padding: 24, gap: 24 }}>

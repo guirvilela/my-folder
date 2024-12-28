@@ -12,6 +12,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { firestore } from "../../../firebaseConfig";
+import { deleteImagesInFolder } from "../pictures";
 import { FoldersRequest, FoldersResponse, ImageProp } from "./types";
 
 export async function getFolders(): Promise<FoldersResponse[]> {
@@ -114,13 +115,21 @@ export async function deleteMainFolder(folderId: string) {
     }
 
     const subfolders = folderData.subfolders || [];
+    const folderPath = [folderId];
+
+    await deleteImagesInFolder(folderPath);
+
     for (const subfolderId of subfolders) {
+      const subfolderPath = [...folderPath, subfolderId];
+      await deleteImagesInFolder(subfolderPath);
+
       await deleteMainFolder(subfolderId);
     }
 
     await deleteDoc(folderRef);
     return folderRef.id;
   } catch (error) {
+    console.error("Erro ao excluir pasta:", error);
     throw error;
   }
 }
@@ -151,7 +160,6 @@ export const copyFolderStructure = async (
   try {
     const foldersCollection = collection(firestore, "folders");
 
-    // Caso a pasta não exista, cria uma nova pasta principal
     if (!folderId) {
       const newFolderRef = await addDoc(foldersCollection, {
         name: folderName,
@@ -174,33 +182,30 @@ export const copyFolderStructure = async (
     const folderData = folderSnapshot.data();
     const { name, subfolders, ...restData } = folderData;
 
-    // Se for a pasta principal, adiciona o sufixo '- cópia'
     const newFolderName = isMainFolder ? `${name} - cópia` : name;
 
     const newFolderRef = await addDoc(foldersCollection, {
       ...restData,
       name: newFolderName,
-      parentId: newParentId, // Certificando-se de que o parentId está correto
-      subfolders: [], // Inicializa as subpastas como vazias por enquanto
+      parentId: newParentId,
+      subfolders: [],
     });
 
     console.log(`Nova pasta criada: ${newFolderRef.id} (cópia de ${folderId})`);
 
     const newSubfolderIds: string[] = [];
     for (const subfolderId of subfolders || []) {
-      // Recursivamente copia as subpastas, passando o ID da nova pasta como novo parentId
       const newSubfolderId = await copyFolderStructure(
         subfolderId,
         undefined,
-        newFolderRef.id, // Aqui passa o ID da pasta recém-criada como novo parentId
-        false // Passa false para não adicionar sufixo nas subpastas
+        newFolderRef.id,
+        false
       );
       if (newSubfolderId) {
         newSubfolderIds.push(newSubfolderId);
       }
     }
 
-    // Atualiza a nova pasta com as subpastas copiadas
     await updateDoc(newFolderRef, { subfolders: newSubfolderIds });
 
     return newFolderRef.id;
@@ -257,7 +262,6 @@ export async function renamePicuteDescription(
     const foldersCollection = collection(firestore, "folders");
     const folderRef = doc(foldersCollection, folderId);
 
-    // Obter o documento atual para localizar o array de imagens
     const folderSnapshot = await getDoc(folderRef);
     if (!folderSnapshot.exists()) {
       throw new Error("Pasta não encontrada");
@@ -266,12 +270,10 @@ export async function renamePicuteDescription(
     const folderData = folderSnapshot.data();
     const images = folderData.images || [];
 
-    // Atualizar a descrição da imagem correspondente no array
     const updatedImages = images.map((image: any) =>
       image.id === imageId ? { ...image, description: newDescription } : image
     );
 
-    // Atualizar o documento no Firestore
     await updateDoc(folderRef, { images: updatedImages });
 
     return folderId;

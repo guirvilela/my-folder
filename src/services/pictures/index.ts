@@ -92,3 +92,26 @@ export async function deleteImage(folderPath: string[], idImage: string) {
     throw new Error("Não foi possível excluir a imagem. Tente novamente.");
   }
 }
+
+export async function deleteImagesInFolder(folderPath: string[]) {
+  try {
+    const folderRef = ref(storage, `photos/${folderPath.join("/")}`);
+
+    // Usar o list com prefixo para garantir que todas as imagens sejam listadas
+    const listResult = await listAll(folderRef); // Isso vai buscar todos os arquivos nesta pasta específica
+
+    // Se houver arquivos, deletá-los
+    for (const item of listResult.items) {
+      await deleteObject(item); // Deletar a imagem
+      console.log(`Imagem ${item.name} deletada com sucesso.`);
+    }
+
+    // Se houver subpastas, faça a recursão nelas
+    for (const prefix of listResult.prefixes) {
+      await deleteImagesInFolder([...folderPath, prefix.name]); // Chama a função recursivamente para as subpastas
+    }
+  } catch (error) {
+    console.error("Erro ao excluir imagens na pasta:", error);
+    throw new Error("Não foi possível excluir as imagens. Tente novamente.");
+  }
+}
