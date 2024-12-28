@@ -5,7 +5,6 @@ import { ModalFolderOptions } from "@/components/folder-options";
 import { Header } from "@/components/header";
 import { Image } from "@/components/image";
 import { ModalImagesOptions } from "@/components/images-options";
-import { ModalCamera } from "@/components/modal-camera";
 import { ModalCreateFolder } from "@/components/modal-folder";
 import { PhotoPreview } from "@/components/photo-preview";
 import { Skeleton } from "@/components/skeleton";
@@ -33,14 +32,12 @@ export default function FolderDetails() {
 
   const {
     formCamera,
-    cameraRef,
     handleOpenCamera,
     handleSavePictureAction,
     handleUploadPictureAction,
     handleDeletePictureAction,
     handleQuestionDeleteImage,
     handleSharePicture,
-    handleTakePicture,
     handleRenamePicutreDescription,
   } = usePictureController({ onRefresh, form });
 
@@ -137,6 +134,16 @@ export default function FolderDetails() {
                   onLoadEnd={() => form.set("loadingImages")(false)}
                   description={description}
                   createdAt={createdAt}
+                  onPress={() =>
+                    formCamera.setAll({
+                      previewPicutre: true,
+                      selectedPicture: {
+                        uri,
+                        description,
+                        createdAt,
+                      } as Partial<ImageBase>,
+                    })
+                  }
                   onLongPress={() =>
                     formCamera.setAll({
                       modalOptionsPicture: true,
@@ -181,19 +188,16 @@ export default function FolderDetails() {
         </Button>
       </View>
 
-      <ModalCamera
-        form={formCamera}
-        cameraRef={cameraRef}
-        onTakePicture={handleTakePicture}
-      />
-
-      {formCamera.value.photo && (
+      {(formCamera.value.photo || formCamera.value.previewPicutre) && (
         <PhotoPreview
           formCamera={formCamera}
           form={form}
           onSave={handleSavePictureAction}
           onShare={handleSharePicture}
           saveAction={handleSavePictureAction}
+          shareLoading={handleSharePicture.loading}
+          isPictureView={formCamera.value.previewPicutre}
+          onClosePreview={() => formCamera.reset()}
         />
       )}
 

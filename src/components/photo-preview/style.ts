@@ -33,7 +33,7 @@ export const styled = StyleSheet.create({
 
   buttonContainer: {
     position: "relative",
-    // bottom: 40,
+    bottom: Platform.OS == "ios" ? 20 : 10,
     gap: 12,
     height: 100,
     width: "100%",
@@ -98,5 +98,19 @@ export const styled = StyleSheet.create({
     alignItems: "center",
     width: 100,
     height: 100,
+  },
+
+  previewDescription: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+  },
+
+  textPreview: {
+    fontFamily: fontFamily.regular,
+    fontSize: 16,
+    color: "white",
+    textAlign: "left",
   },
 });

@@ -1,5 +1,5 @@
 export interface Photo {
-  base64: string;
+  base64?: string;
   exif?: {
     ImageLength: number;
     ImageWidth: number;
@@ -7,7 +7,7 @@ export interface Photo {
     Orientation: number;
     [key: string]: any;
   };
-  height: number;
+  height?: number;
   uri: string;
-  width: number;
+  width?: number;
 }

@@ -10,20 +10,20 @@ import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams } from "expo-router";
-import React, { useRef } from "react";
+import React from "react";
 import { Alert, Keyboard, Platform, Share } from "react-native";
 import { FoldersForm } from "../details";
 import { Form, useForm } from "../form";
 import { useCustomAct } from "../http";
 
 export interface FormCamera {
-  camera: boolean;
   progress: number;
   photo: Photo | undefined;
   selectedPicture: Partial<ImageBase> | undefined;
   modalOptionsPicture: boolean;
   newDescription: string;
   changeDescription: boolean;
+  previewPicutre: boolean;
 }
 
 interface usePictureController {
@@ -36,35 +36,18 @@ export function usePictureController({
   form,
 }: usePictureController) {
   const [_, requestPermission] = useCameraPermissions();
-  const cameraRef = useRef<any>(null);
 
   const params = useLocalSearchParams<{ id: string[] }>();
 
   const formCamera = useForm<FormCamera>({
-    camera: false,
     photo: undefined,
     progress: 0,
     selectedPicture: undefined,
     modalOptionsPicture: false,
     newDescription: "",
     changeDescription: false,
+    previewPicutre: false,
   });
-
-  const handleOpenCamera = React.useCallback(async () => {
-    const { granted } = await requestPermission();
-    const library = await MediaLibrary.requestPermissionsAsync();
-    const mediaLibraryPermission = library.status === "granted";
-
-    try {
-      if (!granted && !mediaLibraryPermission) {
-        return Alert.alert("Câmera", "Você precisa habilitar o uso da câmera");
-      }
-    } catch (error) {
-      Alert.alert("Câmera", "Não foi possível utilizar a câmera");
-    } finally {
-      formCamera.set("camera")(true);
-    }
-  }, [formCamera.value]);
 
   const handleSharePicture = useCustomAct(async () => {
     try {
@@ -109,22 +92,38 @@ export function usePictureController({
     }
   });
 
-  const handleTakePicture = React.useCallback(async () => {
-    const options = {
-      quality: 1,
-      base64: true,
-      exif: true,
-    };
+  const handleOpenCamera = React.useCallback(async () => {
+    const { granted } = await requestPermission();
+    const library = await MediaLibrary.requestPermissionsAsync();
+    const mediaLibraryPermission = library.status === "granted";
 
-    if (cameraRef.current) {
-      const newPhoto = await cameraRef.current.takePictureAsync(options);
+    try {
+      if (!granted && !mediaLibraryPermission) {
+        return Alert.alert("Câmera", "Você precisa habilitar o uso da câmera");
+      }
+    } catch (error) {
+      Alert.alert("Câmera", "Não foi possível utilizar a câmera");
+    } finally {
+      handleTakePicture();
+    }
+  }, [formCamera.value]);
+
+  const handleTakePicture = React.useCallback(async () => {
+    const cameraResp = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+      exif: true,
+    });
+
+    if (cameraResp.assets) {
+      const { uri } = cameraResp.assets[0];
+
       formCamera.setAll({
-        photo: newPhoto,
-        camera: false,
+        photo: { uri },
         progress: 0,
       });
     }
-  }, [cameraRef, formCamera]);
+  }, [formCamera]);
 
   const handleSavePictureAction = useCustomAct(async () => {
     Keyboard.dismiss();
@@ -152,6 +151,9 @@ export function usePictureController({
       const idToFetch = params.id[params.id.length - 1];
       await updatePicuteDescription(idToFetch, imageData);
 
+      if (photoURL) {
+        onRefresh();
+      }
       return photoURL;
     } catch (error) {
       console.error("Erro ao salvar foto:", error);
@@ -167,26 +169,22 @@ export function usePictureController({
         throw new Error("ID inválido");
       }
 
-      const cameraResp = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
+      const cameraResp = await ImagePicker.launchImageLibraryAsync({
         quality: 1,
+        exif: true,
       });
 
       if (!cameraResp.canceled && cameraResp.assets && cameraResp.assets[0]) {
         const { uri } = cameraResp.assets[0];
 
-        const fileName = uri.split("/").pop();
-
-        // const uploadResponse = await uploadTakePicture(
-        //   uri,
-        //   fileName,
-        //   idToFetch
-        // );
-        // console.log("Upload bem-sucedido:", uploadResponse);
+        formCamera.setAll({
+          photo: {
+            uri,
+          },
+        });
       }
     } catch (error) {
-      console.error("Erro ", error);
-      // Aqui você pode adicionar um toast ou alert para o usuário
+      console.error("Erro ao fazer upload da imagem:", error);
       throw error;
     }
   });
@@ -268,23 +266,18 @@ export function usePictureController({
     if (formCamera.value.progress >= 100) {
       formCamera.setAll({
         photo: undefined,
-        camera: false,
         progress: 0,
       });
       form.set("pictureDescription")("");
-
-      onRefresh();
     }
   }, [formCamera.value.progress]);
 
   return {
     formCamera,
-    cameraRef,
     handleSavePictureAction,
     handleUploadPictureAction,
     handleDeletePictureAction,
     handleQuestionDeleteImage,
-    handleTakePicture,
     handleSharePicture,
     handleOpenCamera,
     handleRenamePicutreDescription,

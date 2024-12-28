@@ -7,6 +7,7 @@ interface ImageProps {
   uri: string;
   description?: string;
   createdAt?: string;
+  onPress: () => void;
   onLoading: () => void;
   onLoadEnd: () => void;
   onLongPress: () => void;
@@ -16,6 +17,7 @@ export function Image({
   uri,
   description,
   createdAt,
+  onPress,
   onLoading,
   onLoadEnd,
   onLongPress,
@@ -25,6 +27,7 @@ export function Image({
       style={styled.container}
       activeOpacity={0.8}
       onLongPress={onLongPress}
+      onPress={onPress}
     >
       <RNImage
         source={{ uri }}
