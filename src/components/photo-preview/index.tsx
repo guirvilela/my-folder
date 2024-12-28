@@ -42,6 +42,9 @@ export function PhotoPreview({
   onClosePreview,
 }: PhotoPreviewProps) {
   const scale = new Animated.Value(1);
+  const [isLoading, setIsLoading] = React.useState(
+    !!(formCamera.value.selectedPicture?.uri || formCamera.value.photo?.uri)
+  );
 
   const handlePinchGesture = Animated.event(
     [{ nativeEvent: { scale: scale } }],
@@ -75,7 +78,13 @@ export function PhotoPreview({
         <IconX color={colors.gray[100]} size={18} />
       </Button>
 
-      <View style={{ flex: 1, width: "100%" }}>
+      <View style={styled.imageContainer}>
+        {isLoading && (
+          <View style={styled.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.gray[100]} />
+          </View>
+        )}
+
         <PinchGestureHandler
           onGestureEvent={handlePinchGesture}
           onHandlerStateChange={handlePinchStateChange}
@@ -87,6 +96,7 @@ export function PhotoPreview({
                 ? formCamera.value.selectedPicture?.uri
                 : formCamera.value.photo?.uri,
             }}
+            onLoad={() => setIsLoading(false)}
           />
         </PinchGestureHandler>
       </View>

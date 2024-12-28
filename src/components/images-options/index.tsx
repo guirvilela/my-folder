@@ -33,6 +33,8 @@ export function ModalImagesOptions({
   onShare,
   onChangeDescription,
 }: ModalImagesOptionsProps) {
+  const [isLoadingImage, setIsLoadingImage] = React.useState(true);
+
   const isLoadingDisabled = React.useMemo(
     () => loadingDelete || shareLoading,
     [loadingDelete, shareLoading]
@@ -42,10 +44,17 @@ export function ModalImagesOptions({
     <Modal visible={opened} animationType="fade" transparent={true}>
       <View style={styled.modalBackdrop}>
         <View style={styled.modalContainer}>
+          {isLoadingImage && (
+            <View style={styled.imageLoading}>
+              <ActivityIndicator />
+            </View>
+          )}
+
           <RNImage
             source={{ uri: formCamera.value.selectedPicture?.uri }}
             style={styled.image}
             resizeMode="cover"
+            onLoad={() => setIsLoadingImage(false)}
           />
 
           {!formCamera.value.changeDescription ? (

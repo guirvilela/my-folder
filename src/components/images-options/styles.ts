@@ -10,6 +10,7 @@ export const styled = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
+    position: "relative",
     width: "80%",
     padding: 20,
     backgroundColor: "white",
@@ -23,6 +24,19 @@ export const styled = StyleSheet.create({
     height: 140,
     maxWidth: 140,
     borderRadius: 10,
+  },
+
+  imageLoading: {
+    position: "absolute",
+    top: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 140,
+    height: 140,
+    borderWidth: 2,
+    borderColor: colors.gray[200],
+    borderRadius: 10,
+    zIndex: 1,
   },
 
   textDescription: {

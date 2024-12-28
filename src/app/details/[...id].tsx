@@ -130,8 +130,6 @@ export default function FolderDetails() {
               return (
                 <Image
                   uri={uri}
-                  onLoading={() => form.set("loadingImages")(true)}
-                  onLoadEnd={() => form.set("loadingImages")(false)}
                   description={description}
                   createdAt={createdAt}
                   onPress={() =>

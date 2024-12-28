@@ -75,11 +75,9 @@ export const styled = StyleSheet.create({
   input: {
     position: "absolute",
     top: -50,
-
     zIndex: 1,
     width: "85%",
     color: colors.gray[200],
-
     height: 54,
     borderWidth: 1,
     borderColor: colors.gray[300],
@@ -112,5 +110,22 @@ export const styled = StyleSheet.create({
     fontSize: 16,
     color: "white",
     textAlign: "left",
+  },
+
+  imageContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  loadingContainer: {
+    flex: 1,
+    zIndex: 2,
+    position: "absolute",
+    inset: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.gray[600],
   },
 });
