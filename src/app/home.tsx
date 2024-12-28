@@ -25,8 +25,20 @@ export default function Home() {
   } = useHomeController();
 
   const filteredFolders = React.useMemo(() => {
-    return form.value.folders.filter((folder) => !folder.parentId);
+    return form.value.folders
+      .filter((folder) => !folder.parentId)
+      .sort((a, b) => {
+        const numA = parseInt(a.name.match(/\d+/)?.[0] || "0", 10);
+        const numB = parseInt(b.name.match(/\d+/)?.[0] || "0", 10);
+
+        if (numA && numB) {
+          return numA - numB; // Ordena por número se ambos possuem números
+        }
+        return a.name.localeCompare(b.name); // Ordena alfabeticamente caso contrário
+      });
   }, [form.value.folders]);
+
+  console.log(filteredFolders);
 
   return (
     <View style={{ flex: 1, padding: 24, gap: 24 }}>
@@ -52,7 +64,7 @@ export default function Home() {
         <EmptyFolder />
       ) : (
         <FlatList
-          data={form.value.folders.filter((folder) => !folder.parentId)}
+          data={filteredFolders}
           numColumns={2}
           columnWrapperStyle={{
             justifyContent: "space-between",

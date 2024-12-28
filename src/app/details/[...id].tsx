@@ -47,6 +47,17 @@ export default function FolderDetails() {
     if (!form.value.folder) return [];
     const { subfolders, images } = form.value.folder;
 
+    const sortedSubfolders =
+      subfolders?.sort((a, b) => {
+        const numA = parseInt(a.name.match(/\d+/)?.[0] || "0", 10);
+        const numB = parseInt(b.name.match(/\d+/)?.[0] || "0", 10);
+
+        if (numA && numB) {
+          return numA - numB;
+        }
+        return a.name.localeCompare(b.name);
+      }) || [];
+
     const sortedImages: ImageBase[] =
       images?.sort((a, b) => {
         const dateA = a.createdAt ? new Date(a.createdAt).getTime() : -Infinity;
@@ -56,7 +67,8 @@ export default function FolderDetails() {
       }) || [];
 
     return [
-      ...(subfolders?.map((folder) => ({ ...folder, type: "folder" })) || []),
+      ...(sortedSubfolders.map((folder) => ({ ...folder, type: "folder" })) ||
+        []),
       ...(sortedImages.map((image) => ({ image, type: "image" })) || []),
     ];
   }, [form.value.folder]);
